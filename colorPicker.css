@@ -1,0 +1,138 @@
+:root {
+    /* panel 300px - 4px border - 24px padding, divided by 6 slots */
+    --slot-height: calc((300px - 28px) / 6);
+}
+
+
+/* ── Two-column layout ───────────────────────────────────────────────────── */
+
+.picker-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.picker-panel {
+    width: 300px;
+    height: 300px;
+    border: 2px solid #50bcf2;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(80, 188, 242, 0.2);
+    box-sizing: border-box;
+}
+
+/* ── Left panel ──────────────────────────────────────────────────────────── */
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+}
+
+#colorSlotSelect {
+    width: 100%;
+    padding: 5px 10px;
+    background: transparent;
+    border: 2px solid #50bcf2;
+    border-radius: 50px;
+    color: #f0f0f0;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.pallet-type-row {
+    display: flex;
+    flex-direction: row;
+    height: var(--slot-height);
+}
+
+.pallet-btn {
+    flex: 1;
+    height: var(--slot-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 9px;
+    color: #ccc;
+    text-align: center;
+    line-height: 1.2;
+    padding: 2px;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.pallet-btn:has(input:checked) {
+    background: #50bcf2;
+    color: #000;
+    border-color: #50bcf2;
+}
+
+.pallet-btn-wide {
+    width: 100%;
+    flex: none;
+}
+
+.pallet-btn input[type="radio"] {
+    display: none;
+}
+
+/* ── Slots row: all 6 in one horizontal strip ────────────────────────────── */
+
+.color-slots-row {
+    display: flex;
+    flex-direction: row;
+    height: var(--slot-height);
+    margin-top: auto;
+}
+
+.color-slot {
+    flex: 1;
+    height: var(--slot-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #888;
+    border-radius: 6px;
+}
+
+
+/* ── Text inside each slot ───────────────────────────────────────────────── */
+
+.slot-values {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: monospace;
+    font-size: 9px;
+    gap: 1px;
+    color: #000;
+    text-shadow:
+        -1px -1px 0 #fff,
+         1px -1px 0 #fff,
+        -1px  1px 0 #fff,
+         1px  1px 0 #fff;
+}
+
+/* ── Right panel (wheel) ─────────────────────────────────────────────────── */
+
+.right-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#wheelCanvas {
+    cursor: crosshair;
+    border-radius: 50%;
+    display: block;
+}

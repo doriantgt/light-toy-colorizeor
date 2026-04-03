@@ -1,0 +1,489 @@
+<link rel="stylesheet" href="try1.css"/>
+<link rel="stylesheet" href="gradientAnimation2DSCombined.css"/>
+<link rel="stylesheet" href="colorPicker.css"/>
+
+
+<!-- ============================================================ -->
+<!-- =================== STYLESHEET IMPORTS ==================== -->
+<!-- ============================================================ -->
+
+
+<!-- ============================================================ -->
+<!-- ================== SECTION 1 : PALETTES =================== -->
+<!-- ===  Color wheel picker — defines the 6 source palettes   == -->
+<!-- ============================================================ -->
+<table><tr><td>
+<div class="picker-layout">
+    <div class="picker-panel left-panel">
+        <div class="pallet-type-row">
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="fullHue" checked>
+                Full Hue
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="pastel">
+                Pastel
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="whiteSecond">
+                White 2nd
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="whiteFirst">
+                White 1st
+            </label>
+        </div>
+        <div class="pallet-type-row">
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="complementary">
+                Comp
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="triadic">
+                Triadic
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="analogous">
+                Analog
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="splitComp">
+                Split
+            </label>
+        </div>
+        <div class="pallet-type-row">
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="tetradic">
+                Tetrad
+            </label>
+            <label class="pallet-btn">
+                <input type="radio" name="palletType" value="monochromatic">
+                Mono
+            </label>
+        </div>
+        <label class="pallet-btn pallet-btn-wide">
+            <input type="radio" name="palletType" value="custom">
+            Custom
+        </label>
+        <div class="color-slots-row">
+            <div class="color-slot" id="slot-0">
+                <div class="slot-values">
+                    <span id="delta-0"></span>
+                    <span id="hue-0"></span>
+                    <span id="sat-0"></span>
+                </div>
+            </div>
+            <div class="color-slot" id="slot-1">
+                <div class="slot-values">
+                    <span id="delta-1"></span>
+                    <span id="hue-1"></span>
+                    <span id="sat-1"></span>
+                </div>
+            </div>
+            <div class="color-slot" id="slot-2">
+                <div class="slot-values">
+                    <span id="delta-2"></span>
+                    <span id="hue-2"></span>
+                    <span id="sat-2"></span>
+                </div>
+            </div>
+            <div class="color-slot" id="slot-3">
+                <div class="slot-values">
+                    <span id="delta-3"></span>
+                    <span id="hue-3"></span>
+                    <span id="sat-3"></span>
+                </div>
+            </div>
+            <div class="color-slot" id="slot-4">
+                <div class="slot-values">
+                    <span id="delta-4"></span>
+                    <span id="hue-4"></span>
+                    <span id="sat-4"></span>
+                </div>
+            </div>
+            <div class="color-slot" id="slot-5">
+                <div class="slot-values">
+                    <span id="delta-5"></span>
+                    <span id="hue-5"></span>
+                    <span id="sat-5"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="picker-panel right-panel">
+        <canvas id="wheelCanvas"></canvas>
+    </div>
+</div>
+</td></tr></table>
+	<!--   <tr>
+      <td class="imageManip"><canvas id="canvas0" width="300" height="227"></canvas></td>
+      <td class="imageManip color-cell" id="hovered-color"></td>
+      <td class="imageManip color-cell" id="selected-color"></td>
+    </tr>-->
+<!-- ============================================================ -->
+<!-- ================ SECTION 2 : IMAGE PREVIEWS ============== -->
+<!-- ===  canvas0 = source image                              === -->
+<!-- ===  canvas1 = palette-mapped output                     === -->
+<!-- ===  canvas2 = post-processed / gradient-overlay output  === -->
+<!-- ===  canvas3 = animated vertical scan of canvas1         === -->
+<!-- ============================================================ -->
+	<table>
+    <tr>
+	<td>
+	  <label for="imageSelect">Image: <br></label>
+	  <select id="imageSelect" onchange="loadSelectedImage()">
+	    <option value="https://raw.githubusercontent.com/doriantgt/IMAGES/refs/heads/main/cubes.png" selected>cubes</option>
+	    <option value="https://raw.githubusercontent.com/doriantgt/IMAGES/refs/heads/main/smiley2.png">smiley2</option>
+	    <option value="https://raw.githubusercontent.com/doriantgt/IMAGES/refs/heads/main/RHINO.png">RHINO</option>
+	  </select>
+	</td>
+	<td><canvas id="canvas0" class="imageDimensions"></canvas></td>
+	<td><canvas id="canvas1" class="imageDimensions"></canvas></td>
+	<td><canvas id="canvas2" class="imageDimensions"></canvas></td>
+	<td><canvas id="canvas3" class="imageDimensions"></canvas></td>
+	</tr>
+	<tr>
+	<td></td><td></td><td></td><td></td>
+	<td>
+	  <label for="scanStepSlider">Scan Speed: <span id="scanStepValue">1</span> px/frame</label><br>
+	  <input type="range" id="scanStepSlider" min="1" max="20" value="5">
+	</td>
+	</tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- ============= SECTION 3 : CHANNEL GRADIENT SELECTORS ===== -->
+<!-- ===  Red / Green / Blue channel gradient editors         === -->
+<!-- ===  Each gradient maps to one image channel in output   === -->
+<!-- ============================================================ -->
+<table>
+  <tbody>
+  <tr>
+<td>
+<div class="container" id="container0">
+			<h2 class="gradient-channel-title">Red Channel</h2>
+			<div class="animation-type">
+			  <table>
+				<tr>
+				  <td class="checky"><input type="checkbox" id="slideChecked" onchange="gradienter0.setAnimationType('null')"><label for="slideChecked">⬅️ Slide</label></td>
+				  <td class="checky"><input type="checkbox" id="rotateChecked" onchange="gradienter0.setAnimationType('null')"><label for="rotateChecked">🔄 Rotate</label></td>
+				</tr>
+				<tr>
+				  <td class="checky"><input type="checkbox" id="horizontalChecked" checked onchange="gradienter0.setGradientType('horizontalChecked')"><label for="horizontalChecked">horizontal</label></td>
+				  <td class="checky"><input type="checkbox" id="virticleChecked" onchange="gradienter0.setGradientType('virticleChecked')"><label for="virticleChecked">vertical</label></td>
+				  <td class="checky"><input type="checkbox" id="diagnolChecked" onchange="gradienter0.setGradientType('diagnolChecked')"><label for="diagnolChecked">diagonal</label></td>
+				  <td class="checky"><input type="checkbox" id="radialChecked" onchange="gradienter0.setGradientType('radialChecked')"><label for="radialChecked">radial</label></td>
+				</tr>
+			  </table>
+			  <!-- Both is implicitly selected when both checkboxes are checked -->
+			</div>
+			
+			<div class="canvas-container">
+			  <canvas id="gradientCanvas"></canvas>
+			</div>
+		   
+			<div class="controls">
+			  <button onclick="gradienter0.toggleSlideDirection()" id="slideDirectionBtn">↔ Toggle Direction</button>
+			  <button onclick="gradienter0.toggleRotateDirection()" id="rotateDirectionBtn">↻ Toggle Rotation</button>
+			</div>
+			
+			<div class="slider-container">
+			  <label for="slideSpeedSlider">Slide Speed: <span id="slideSpeedValue">5</span></label><br>
+			  <input type="range" id="slideSpeedSlider" min="1" max="20" value="5">
+			</div>
+			
+			<div class="slider-container">
+			  <label for="rotateSpeedSlider">Rotation Speed: <span id="rotateSpeedValue">5</span></label><br>
+			  <input type="range" id="rotateSpeedSlider" min="1" max="20" value="5">
+			</div>
+			
+			<div class="slider-container">
+			  <label for="stretchSlider">Stretch: <span id="stretchValue">1.0</span></label><br>
+			  <input type="range" id="stretchSlider" min="0.1" max="5" value="1" step="0.1">
+			</div>
+			
+			<div class="rotation-center" id="rotationControl" style="display: none;">
+			  <label>Rotation Center:</label>
+			  <button onclick="gradienter0.setRotationCenter('center')">Center</button>
+			  <button onclick="gradienter0.setRotationCenter('mouse')">Follow Mouse</button>
+			  <button onclick="gradienter0.setRotationCenter('random')">Random</button>
+			</div>
+			
+			<div class="color-count-select">
+			  <label for="colorCountSelect">Colors: </label>
+			  <select id="colorCountSelect" onchange="gradienter0.setColorCount(this.value)">
+				<option value="rainbow">🌈 Rainbow</option>
+				<option value="1">1 Color</option>
+				<option value="2" selected>2 Colors</option>
+				<option value="3">3 Colors</option>
+			  </select>
+			</div>
+			<div class="color-pickers">
+			  <div class="color-input">
+				<select id="startColorSelect" onchange="gradienter0.setPaletteColor('start', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="startColor" value="#0000ff">
+			  </div>
+			  <div class="color-input" id="middleColorContainer">
+				<select id="middleColorSelect" onchange="gradienter0.setPaletteColor('middle', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="middleColor" value="#2fff00">
+			  </div>
+			  <div class="color-input" id="endColorContainer" style="display:none;">
+				<select id="endColorSelect" onchange="gradienter0.setPaletteColor('end', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="endColor" value="#0000ff">
+			  </div>
+			</div>
+			
+			<div class="info" id="animationStatus">
+			  Animation: Stopped | Type: Slide | Direction: Left to Right
+			</div>
+		  </div>
+  </td>
+  
+  <td>
+<div class="container" id="container1">
+			<h2 class="gradient-channel-title">Green Channel</h2>
+			<div class="animation-type">
+			  <table>
+				<tr>
+				  <td class="checky"><input type="checkbox" id="slideChecked" onchange="gradienter1.setAnimationType('null')"><label for="slideChecked">⬅️ Slide</label></td>
+				  <td class="checky"><input type="checkbox" id="rotateChecked" onchange="gradienter1.setAnimationType('null')"><label for="rotateChecked">🔄 Rotate</label></td>
+				</tr>
+				<tr>
+				  <td class="checky"><input type="checkbox" id="horizontalChecked" checked onchange="gradienter1.setGradientType('horizontalChecked')"><label for="horizontalChecked">horizontal</label></td>
+				  <td class="checky"><input type="checkbox" id="virticleChecked" onchange="gradienter1.setGradientType('virticleChecked')"><label for="virticleChecked">vertical</label></td>
+				  <td class="checky"><input type="checkbox" id="diagnolChecked" onchange="gradienter1.setGradientType('diagnolChecked')"><label for="diagnolChecked">diagonal</label></td>
+				  <td class="checky"><input type="checkbox" id="radialChecked" onchange="gradienter1.setGradientType('radialChecked')"><label for="radialChecked">radial</label></td>
+				</tr>
+			  </table>
+			  <!-- Both is implicitly selected when both checkboxes are checked -->
+			</div>
+			
+			<div class="canvas-container">
+			  <canvas id="gradientCanvas"></canvas>
+			</div>
+		   
+			<div class="controls">
+			  <button onclick="gradienter1.toggleSlideDirection()" id="slideDirectionBtn">↔ Toggle Direction</button>
+			  <button onclick="gradienter1.toggleRotateDirection()" id="rotateDirectionBtn">↻ Toggle Rotation</button>
+			</div>
+			
+			<div class="slider-container">
+			  <label for="slideSpeedSlider">Slide Speed: <span id="slideSpeedValue">5</span></label><br>
+			  <input type="range" id="slideSpeedSlider" min="1" max="20" value="5">
+			</div>
+			
+			<div class="slider-container">
+			  <label for="rotateSpeedSlider">Rotation Speed: <span id="rotateSpeedValue">5</span></label><br>
+			  <input type="range" id="rotateSpeedSlider" min="1" max="20" value="5">
+			</div>
+			
+			<div class="slider-container">
+			  <label for="stretchSlider">Stretch: <span id="stretchValue">1.0</span></label><br>
+			  <input type="range" id="stretchSlider" min="0.1" max="5" value="1" step="0.1">
+			</div>
+			
+			<div class="rotation-center" id="rotationControl" style="display: none;">
+			  <label>Rotation Center:</label>
+			  <button onclick="gradienter1.setRotationCenter('center')">Center</button>
+			  <button onclick="gradienter1.setRotationCenter('mouse')">Follow Mouse</button>
+			  <button onclick="gradienter1.setRotationCenter('random')">Random</button>
+			</div>
+			
+			<div class="color-count-select">
+			  <label for="colorCountSelect">Colors: </label>
+			  <select id="colorCountSelect" onchange="gradienter1.setColorCount(this.value)">
+				<option value="rainbow">🌈 Rainbow</option>
+				<option value="1">1 Color</option>
+				<option value="2" selected>2 Colors</option>
+				<option value="3">3 Colors</option>
+			  </select>
+			</div>
+			<div class="color-pickers">
+			  <div class="color-input">
+				<select id="startColorSelect" onchange="gradienter1.setPaletteColor('start', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="startColor" value="#0000ff">
+			  </div>
+			  <div class="color-input" id="middleColorContainer">
+				<select id="middleColorSelect" onchange="gradienter1.setPaletteColor('middle', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="middleColor" value="#2fff00">
+			  </div>
+			  <div class="color-input" id="endColorContainer" style="display:none;">
+				<select id="endColorSelect" onchange="gradienter1.setPaletteColor('end', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="endColor" value="#0000ff">
+			  </div>
+			</div>
+			
+			<div class="info" id="animationStatus">
+			  Animation: Stopped | Type: Slide | Direction: Left to Right
+			</div>
+		  </div>
+  </td>
+
+  <td>
+<div class="container" id="container2">
+			<h2 class="gradient-channel-title">Blue Channel</h2>
+			<div class="animation-type">
+			  <table>
+				<tr>
+				  <td class="checky"><input type="checkbox" id="slideChecked" onchange="gradienter2.setAnimationType('null')"><label for="slideChecked">⬅️ Slide</label></td>
+				  <td class="checky"><input type="checkbox" id="rotateChecked" onchange="gradienter2.setAnimationType('null')"><label for="rotateChecked">🔄 Rotate</label></td>
+				</tr>
+				<tr>
+				  <td class="checky"><input type="checkbox" id="horizontalChecked" checked onchange="gradienter2.setGradientType('horizontalChecked')"><label for="horizontalChecked">horizontal</label></td>
+				  <td class="checky"><input type="checkbox" id="virticleChecked" onchange="gradienter2.setGradientType('virticleChecked')"><label for="virticleChecked">vertical</label></td>
+				  <td class="checky"><input type="checkbox" id="diagnolChecked" onchange="gradienter2.setGradientType('diagnolChecked')"><label for="diagnolChecked">diagonal</label></td>
+				  <td class="checky"><input type="checkbox" id="radialChecked" onchange="gradienter2.setGradientType('radialChecked')"><label for="radialChecked">radial</label></td>
+				</tr>
+			  </table>
+			  <!-- Both is implicitly selected when both checkboxes are checked -->
+			</div>
+			
+			<div class="canvas-container">
+			  <canvas id="gradientCanvas"></canvas>
+			</div>
+		   
+			<div class="controls">
+			  <button onclick="gradienter2.toggleSlideDirection()" id="slideDirectionBtn">↔ Toggle Direction</button>
+			  <button onclick="gradienter2.toggleRotateDirection()" id="rotateDirectionBtn">↻ Toggle Rotation</button>
+			</div>
+			
+			<div class="slider-container">
+			  <label for="slideSpeedSlider">Slide Speed: <span id="slideSpeedValue">5</span></label><br>
+			  <input type="range" id="slideSpeedSlider" min="1" max="20" value="5">
+			</div>
+			
+			<div class="slider-container">
+			  <label for="rotateSpeedSlider">Rotation Speed: <span id="rotateSpeedValue">5</span></label><br>
+			  <input type="range" id="rotateSpeedSlider" min="1" max="20" value="5">
+			</div>
+			
+			<div class="slider-container">
+			  <label for="stretchSlider">Stretch: <span id="stretchValue">1.0</span></label><br>
+			  <input type="range" id="stretchSlider" min="0.1" max="5" value="1" step="0.1">
+			</div>
+			
+			<div class="rotation-center" id="rotationControl" style="display: none;">
+			  <label>Rotation Center:</label>
+			  <button onclick="gradienter2.setRotationCenter('center')">Center</button>
+			  <button onclick="gradienter2.setRotationCenter('mouse')">Follow Mouse</button>
+			  <button onclick="gradienter2.setRotationCenter('random')">Random</button>
+			</div>
+			
+			<div class="color-count-select">
+			  <label for="colorCountSelect">Colors: </label>
+			  <select id="colorCountSelect" onchange="gradienter2.setColorCount(this.value)">
+				<option value="rainbow">🌈 Rainbow</option>
+				<option value="1" selected>1 Color</option>
+				<option value="2">2 Colors</option>
+				<option value="3">3 Colors</option>
+			  </select>
+			</div>
+			<div class="color-pickers">
+			  <div class="color-input">
+				<select id="startColorSelect" onchange="gradienter2.setPaletteColor('start', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="startColor" value="#0000ff">
+			  </div>
+			  <div class="color-input" id="middleColorContainer">
+				<select id="middleColorSelect" onchange="gradienter2.setPaletteColor('middle', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="middleColor" value="#2fff00">
+			  </div>
+			  <div class="color-input" id="endColorContainer" style="display:none;">
+				<select id="endColorSelect" onchange="gradienter2.setPaletteColor('end', this.value)">
+				  <option value="-1" selected>-- pick pallet --</option>
+				  <option value="0">Pallet 1</option>
+				  <option value="1">Pallet 2</option>
+				  <option value="2">Pallet 3</option>
+				  <option value="3">Pallet 4</option>
+				  <option value="4">Pallet 5</option>
+				  <option value="5">Pallet 6</option>
+				</select>
+				<input type="color" id="endColor" value="#0000ff">
+			  </div>
+			</div>
+			
+			<div class="info" id="animationStatus">
+			  Animation: Stopped | Type: Slide | Direction: Left to Right
+			</div>
+		  </div>
+  </td>
+  </tr>
+  </tbody>
+  </table>
+
+<!-- ============================================================ -->
+<!-- ===================== SCRIPT IMPORTS ====================== -->
+<!-- ===  Load order matters — class definitions before init  === -->
+<!-- ============================================================ -->
+  <script src="colorPicker.js"></script>
+  <script src="gradientAnimation2DSobjtDeepS.js"></script>
+
+<script src="C:\Users\doria\Documents\programming\javascript\libraries\hsvObjects.js"></script>
+
+<script src="C:\Users\doria\Documents\programming\javascript\image testing 1\hsvToRgb.js"></script>
+
+<script src="try1.js"></script>
+	<!-- <iframe src="C:\Users\doria\Documents\programming\javascript\image testing 1\gradientAnimation2DS.html" width="33%" height="100%"></iframe> -->

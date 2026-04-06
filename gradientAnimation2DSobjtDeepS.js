@@ -66,6 +66,10 @@ class Gradienter {
         this.stretchSlider = this.container.querySelector('#stretchSlider');
         this.stretchValue  = this.container.querySelector('#stretchValue');
         this.stretchFactor = 1;
+        this.slidePhaseSlider  = this.container.querySelector('#slidePhaseSlider');
+        this.slidePhaseValue   = this.container.querySelector('#slidePhaseValue');
+        this.rotatePhaseSlider = this.container.querySelector('#rotatePhaseSlider');
+        this.rotatePhaseValue  = this.container.querySelector('#rotatePhaseValue');
 
         this.initEventListeners();
         this.drawGradient();
@@ -95,7 +99,25 @@ class Gradienter {
             this.stretchValue.textContent = this.stretchFactor.toFixed(1);
             this.drawGradient();
         });
-        
+
+        if (this.slidePhaseSlider) {
+            this.slidePhaseSlider.addEventListener('input', (e) => {
+                const pct     = parseInt(e.target.value) / 100;
+                const dim     = this.virticleChecked ? this.canvas.height : this.canvas.width;
+                this.offset   = pct * dim * this.stretchFactor;
+                this.slidePhaseValue.textContent = e.target.value;
+                this.drawGradient();
+            });
+        }
+
+        if (this.rotatePhaseSlider) {
+            this.rotatePhaseSlider.addEventListener('input', (e) => {
+                this.rotation = parseInt(e.target.value);
+                this.rotatePhaseValue.textContent = this.rotation;
+                this.drawGradient();
+            });
+        }
+
         this.container.querySelector('#colorCountSelect').addEventListener('change', (e) => {
             this.setColorCount(e.target.value);
         });
@@ -296,7 +318,10 @@ class Gradienter {
                 y: (this.rotationCenter.y + Math.random() * 4 - 2 + this.canvas.height) % this.canvas.height
             };
         }
-        
+
+        // Sync phase sliders to current animation state
+        this._syncPhaseSliders();
+
         // Draw the gradient
         this.drawGradient();
         
@@ -357,6 +382,21 @@ class Gradienter {
             this.rotationCenter = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
         }
         this.drawGradient();
+    }
+
+    _syncPhaseSliders() {
+        if (this.slidePhaseSlider) {
+            const dim     = this.virticleChecked ? this.canvas.height : this.canvas.width;
+            const gradDim = dim * this.stretchFactor;
+            const pct     = gradDim > 0 ? Math.round((this.offset / gradDim) * 100) : 0;
+            this.slidePhaseSlider.value      = pct;
+            this.slidePhaseValue.textContent = pct;
+        }
+        if (this.rotatePhaseSlider) {
+            const rot = ((Math.round(this.rotation) % 360) + 360) % 360;
+            this.rotatePhaseSlider.value      = rot;
+            this.rotatePhaseValue.textContent = rot;
+        }
     }
 
     // Toggle animation direction

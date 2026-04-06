@@ -57,7 +57,6 @@ class ColorWheelPicker {
         this.activeSlot = 0;
         this.isDragging = false;
         this.palletType = palletFullHue;
-        this.onChange   = null;
 
         this._buildWheel();
         this._initEvents();
@@ -302,6 +301,7 @@ class ColorWheelPicker {
         } else {
             this.render();
             this._refreshAllSlots();
+            this.onChange?.();
         }
     }
 
@@ -318,6 +318,7 @@ class ColorWheelPicker {
         }
         this.render();
         this._refreshAllSlots();
+        this.onChange?.();
     }
 
     _highlightActiveSlot() {
@@ -331,7 +332,6 @@ class ColorWheelPicker {
         for (let i = 0; i < NUM_SLOTS; i++) {
             this._updateSlotDisplay(i);
         }
-        if (this.onChange) this.onChange();
     }
 
     _updateSlotDisplay(i) {
@@ -385,13 +385,7 @@ class ColorWheelPicker {
     }
 }
 
-var colorWheelPicker;
-function _initColorWheelPicker() {
-    colorWheelPicker = new ColorWheelPicker('wheelCanvas', 300);
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', _initColorWheelPicker);
-} else {
-    _initColorWheelPicker();
-}
+document.addEventListener('DOMContentLoaded', () => {
+    window.colorWheelPicker = new ColorWheelPicker('wheelCanvas', 300);
+    if (typeof updateColor === 'function') updateColor();
+});

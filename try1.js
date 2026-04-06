@@ -6,7 +6,7 @@ const PALETTE_COUNT = 6;
 const rgb           = [];
 
 function updateColor() {
-    const picker = colorWheelPicker;
+    const picker = window.colorWheelPicker;
     if (!picker) return;
 
     for (let i = 0; i < PALETTE_COUNT; i++) {
@@ -59,6 +59,8 @@ canvas[3] = document.getElementById('canvas3'); // scan + gradient overlay
 ctx[3]    = canvas[3].getContext('2d');
 
 image.onload = () => {
+    updateColor();
+
     const targetHeight = 300;
     const targetWidth  = Math.round(image.naturalWidth * (targetHeight / image.naturalHeight));
 
